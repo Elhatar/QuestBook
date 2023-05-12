@@ -2,8 +2,9 @@
 #include <string>
 #include <fstream> //библиотека для работы с файлами
 #include <Windows.h>
+#include <ctime>
 
-//4. Функция сброса статуса ежедневных задач в 00:00
+//5. Функция наград с лутбоксами
 using namespace std;
 
 class Quest
@@ -112,16 +113,70 @@ public:
 		}
 		file.close();
 	}
+	void Reset()
+	{
+		fstream file(fileName, ios::in | ios::out | ios::binary);
+		if (!file)
+			cout << "Ошибка чтения файла" << endl;
+		else
+		{
+			while (file)
+			{
+				if (file.get() == (char)2)
+				{
+					file.seekp(-1, file.cur);
+					file.put((char)1);
+					file.flush();
+				}
+			}
+		}
+		file.close();
+	}
 
 };
 
-int main()
+class Date
+{
+	int currentDate;
+public:
+	void SetCurrentDate() //Записывает в currentDate сегодняшний день
+	{
+		time_t now = time(0);
+		#pragma warning(suppress : 4996)
+		tm* ltm = localtime(&now);
+		currentDate = ltm->tm_mday;
+	}
+	string GetCurrentDate()
+	{
+		return to_string(currentDate);
+	}
+	string GetLastDateFromFile()
+	{
+		string line;
+		fstream file("date");
+		getline(file, line);
+		return line;
+	}
+	void WriteCurrentDateToFile()
+	{
+		ofstream file("date", fstream::in | fstream::out | fstream::app);
+		file << currentDate << endl;
+		file.close();
+	}
+};
+
+int main()//////////////Вход в программу (а то теряю его уже)
 {
 	setlocale(LC_ALL, "rus");
 	File daily, main;
+	Date date;
 	daily.SetFileName("dailyQuests");
 	main.SetFileName("mainQuests");
-
+	date.SetCurrentDate();
+	if (date.GetCurrentDate() == date.GetLastDateFromFile())
+	{
+		daily.Reset();
+	}
 	cout << "Задания:" << endl;
 	daily.PrintFile();
 	main.PrintFile();
@@ -181,6 +236,7 @@ int main()
 		main.Recreate();
 		break;
 	case 5:
+		date.WriteCurrentDateToFile();
 		return 0;
 	}
 	
@@ -201,15 +257,14 @@ int main()
 
 //Активно: 1:
 // 
-//4. Функция сброса статуса ежедневных задач в 00:00
+//5. Функция наград с лутбоксами
 // 
-//Доступно: 6:
+//Доступно: 5:
 
 //1. Создать 2 файла и реализовать доступ программы к ним
 //2. Функция добавления задач
 //3. Функция выполнения задач
 //4. Функция сброса статуса ежедневных задач в 00:00
-//5. Функция автозапуска программы
-//6. Функция наград с лутбоксами
+//5. Функция наград с лутбоксами
 
 //Отложено: 0:
