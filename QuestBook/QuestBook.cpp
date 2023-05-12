@@ -3,8 +3,8 @@
 #include <fstream> //библиотека для работы с файлами
 #include <Windows.h>
 #include <ctime>
+#include<random>
 
-//5. Функция наград с лутбоксами
 using namespace std;
 
 class Quest
@@ -41,16 +41,24 @@ public:
 	Quest GetNewQuestFromConsole() //Получает новый квест из консоли и возвращает его
 	{
 		string condition;
-		string type;
+		int type;
 		Quest quest;
 		cout << "Напиши условие задания здесь:" << endl;
 		SetConsoleCP(1251);
 		cin.get();
 		getline(std::cin, condition);
-		cout << "Это Ежедневное задание, или Основное?" << endl;
+		cout << "Введи тип задания: 1. Ежедневное, 2. Основное" << endl;
 		cin >> type;
+		switch (type)
+		{
+		case 1:
+			quest.type = "Ежедневное";
+			break;
+		case 2:
+			quest.type = "Основное";
+			break;
+		}
 		SetConsoleCP(866);
-		quest.type = type;
 		quest.condition = condition;
 		return quest;
 	}
@@ -165,11 +173,56 @@ public:
 	}
 };
 
-int main()//////////////Вход в программу (а то теряю его уже)
+class Loot
+{
+	public:
+	void GetReward()
+	{
+		string line;
+		int lineCount = 0, value;
+		fstream file("rewards.txt");
+		if (!file)
+			cout << "Ошибка" << endl;
+		else
+		{
+			while (!file.eof())
+			{
+				getline(file, line);
+				lineCount++;
+			}
+		}
+		value = rand() % lineCount;
+		while (!file.eof())
+		{
+			getline(file, line);			
+			if (value == 0)
+				break;
+			value--;
+		}
+		cout << "Ваша награда - " << line << endl;
+		file.close();
+	}
+	void AddReward()
+	{
+		SetConsoleCP(1251);
+		string reward;
+		cout << "Введите название награды:" << endl;
+		cin.get();
+		getline(cin, reward);
+		SetConsoleCP(866);
+		fstream file("rewards.txt", fstream::in | fstream::out | fstream::app);
+		file << reward << endl;
+		file.close();
+	}
+};
+
+int main()
 {
 	setlocale(LC_ALL, "rus");
+	srand(time(NULL));
 	File daily, main;
 	Date date;
+	Loot reward;
 	daily.SetFileName("dailyQuests");
 	main.SetFileName("mainQuests");
 	date.SetCurrentDate();
@@ -190,8 +243,9 @@ int main()//////////////Вход в программу (а то теряю ег�
 	cout << "1. Отобразить задания" << endl;
 	cout << "2. Добавить задание" << endl;
 	cout << "3. Выполнить задание" << endl;
-	cout << "4. Пересоздать файлы" << endl;
-	cout << "5. Выход" << endl;
+	cout << "4. Добавить награду в лутбокс" << endl;
+	cout << "5. Пересоздать файлы" << endl;
+	cout << "6. Выход" << endl;
 	int input;
 	cin >> input;
 	switch (input)
@@ -200,7 +254,6 @@ int main()//////////////Вход в программу (а то теряю ег�
 		cout << "Задания:" << endl;
 		daily.PrintFile();
 		main.PrintFile();
-		cout << endl;
 		break;
 	case 2:
 		{
@@ -227,44 +280,25 @@ int main()//////////////Вход в программу (а то теряю ег�
 			daily.CompleteQuest();
 			break;
 		case 2:
-			daily.CompleteQuest();
+			main.CompleteQuest();
+			reward.GetReward();
 			break;
 		}
 		break;
 	case 4:
+		reward.AddReward();
+		break;
+	case 5:
 		daily.Recreate();
 		main.Recreate();
 		break;
-	case 5:
+	case 6:
 		date.WriteCurrentDateToFile();
 		return 0;
+	default:
+		cout << "Попробуйте снова" << endl;
+		goto m1;
 	}
 	
 	goto m1;//Конец меню
 }
-
-/*Пример:
-* Ежедневные задания:
-* 1. Спорт				1
-* 2. Программирование	1
-* 
-* Сюжетные задания:
-* 1. Документы в универ 	0
-* 2. Лабы по АрхПК			0
-*/
-
-//Тикеты:
-
-//Активно: 1:
-// 
-//5. Функция наград с лутбоксами
-// 
-//Доступно: 5:
-
-//1. Создать 2 файла и реализовать доступ программы к ним
-//2. Функция добавления задач
-//3. Функция выполнения задач
-//4. Функция сброса статуса ежедневных задач в 00:00
-//5. Функция наград с лутбоксами
-
-//Отложено: 0:
