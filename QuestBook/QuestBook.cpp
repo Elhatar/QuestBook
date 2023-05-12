@@ -226,7 +226,7 @@ int main()
 	daily.SetFileName("dailyQuests");
 	main.SetFileName("mainQuests");
 	date.SetCurrentDate();
-	if (date.GetCurrentDate() == date.GetLastDateFromFile())
+	if (date.GetCurrentDate() != date.GetLastDateFromFile())
 	{
 		daily.Reset();
 	}
